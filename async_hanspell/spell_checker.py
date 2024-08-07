@@ -1,4 +1,3 @@
-from headers import *
 import aiohttp
 import asyncio
 import re
@@ -7,11 +6,22 @@ from urllib import parse
 import time
 from collections import OrderedDict
 import xml.etree.ElementTree as ET
-from check_result import CheckResult
-from checked import Checked
+
+from . import __version__
+from .headers import *
+from .check_result import CheckResult
+from .checked import Checked
 
 # 토큰 요청을 줄이기 위해 캐시로 저장합니다.
 cache = TTLCache(maxsize=10, ttl=3600)
+
+class PythonVersionError(Exception):
+    pass
+
+def check_python_version():
+    import sys
+    if sys.version_info < (3, 10):
+        raise PythonVersionError("파이썬 버전 3.10 이상이 필요합니다.")
 
 def remove_tags_and_contents(text):
     # 정규 표현식: '<...>'와 그 안의 내용을 모두 삭제합니다.
@@ -19,6 +29,9 @@ def remove_tags_and_contents(text):
 
 class AsyncSpellChecker:
     def __init__(self) -> None:
+        # 파이썬 버전 검사
+        check_python_version()
+        
         # 매개 변수 정의
         self.token_url = token_url
         self.spell_checker_url = spell_checker_url
