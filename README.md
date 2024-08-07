@@ -1,19 +1,17 @@
-# async-hanspell
+# py-async-hanspell
 
-[ssut/py-hanspell](https://github.com/ssut/py-hanspell) 을 포크하여 제작된 모듈입니다
+[ssut/py-hanspell](https://github.com/ssut/py-hanspell) 모듈을 포크(Fork)하여 제작된 모듈입니다
 네이버 맞춤법 검사기를 비동기로 만든 모듈입니다.
-passportKey 이가 고쳐진 모듈입니다.
+passportKey 문제가 고쳐진 모듈입니다.
 ---
 
 ## 설치
 
 
-### 필요한 라이브러리
+## 필요한 라이브러리
 
 
 ## 사용 방법
-
-
 
 
 ## 라이브러리 사용에 대한 안내
@@ -25,11 +23,9 @@ passportKey 이가 고쳐진 모듈입니다.
 ## 변경내역
 
 
-
-
 ## 라이선스(License)
 
-async-hanspell은 MIT License로 제공됩니다. 라이선스 전문은 아래와 같습니다:
+py-async-hanspell은 MIT License로 제공됩니다. 라이선스 전문은 아래와 같습니다:
 
 ```
 The MIT License (MIT)
