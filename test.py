@@ -3,6 +3,8 @@ import asyncio
 
 async def main1():
     SpellChecker = AsyncSpellChecker()
+    await SpellChecker.initialize_token()
+    
     tasks = [
         SpellChecker.spell_check(
             text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
@@ -26,6 +28,7 @@ async def main1():
 
 async def main2():
     SpellChecker = AsyncSpellChecker()
+    await SpellChecker.initialize_token() # 토큰 초기화 메소드 입니다. 반드시 호출해야합니다.
     
     word1 = await SpellChecker.spell_check(
             text=["안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다."],

@@ -50,8 +50,8 @@ class AsyncSpellChecker:
         except KeyError:
             self.token = await self._get_token()
     
-    
-    async def _initialize_token(self):
+    # 토큰 값 업데이트 및 재사용 홤수
+    async def initialize_token(self):
         # 토큰을 생성합니다.
         await self._create_token() if self.token is None else await self._read_token() # 토큰을 불러옵니다.
     
@@ -114,7 +114,7 @@ class AsyncSpellChecker:
         
         for txt in texts:
             start_time = time.time()
-            await self._initialize_token()  # 반복할때마다 토큰을 재초기화 (한번 초기화하면 캐시에 저장된게 불러와짐.)
+            await self.initialize_token()  # 반복할때마다 토큰을 재초기화 (한번 초기화하면 캐시에 저장된게 불러와짐.)
             spell_checked_data.append(await self._get_response(txt))  # 응답 가져와서 저장
             passed_time_data.append(time.time() - start_time)
             await asyncio.sleep(async_delay)  # 대기
