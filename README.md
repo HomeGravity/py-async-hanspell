@@ -12,7 +12,8 @@ passportKey 문제가 고쳐진 모듈입니다.
 
 
 ## 필요한 라이브러리
-
+import aiohttp
+import asyncio
 
 ## 사용 방법
 
