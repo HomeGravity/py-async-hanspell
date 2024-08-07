@@ -157,7 +157,7 @@ class AsyncSpellChecker:
         return await self._check_words(result, words)  # 비동기 체크 호출
     
     def _remove_tags(self, text):
-        text = u'<content>{}</content>'.format(text).replace('<br>','')
+        text = '<content>{}</content>'.format(text).replace('<br>','')
         result = ''.join(ET.fromstring(text).itertext())
 
         return result
@@ -170,7 +170,7 @@ class AsyncSpellChecker:
                 pos = word.find('>') + 1
                 tmp = word[:pos]
             elif tmp != '':
-                word = u'{}{}'.format(tmp, word)
+                word = '{}{}'.format(tmp, word)
             
             if word[-5:] == '<end>':
                 word = word.replace('<end>', '')
