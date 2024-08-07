@@ -38,7 +38,7 @@ class AsyncSpellChecker:
         self.token_requests_headers = token_requests_headers
         self.spell_checker_requests_headers = spell_checker_requests_headers
         
-        # 토큰
+        # 토큰 초기화
         self.token = None
         
         # 세션 생성
@@ -57,6 +57,10 @@ class AsyncSpellChecker:
         except KeyError:
             self.token = await self._get_token()
     
+    
+    async def _initialize_token(self):
+        # 토큰을 생성합니다.
+        await self._create_token() if self.token is None else await self._read_token() # 토큰을 불러옵니다.
     
     # 토큰 생성을 요청합니다.
     async def _get_token(self):
@@ -93,25 +97,27 @@ class AsyncSpellChecker:
             
             return await response.json()
 
-    async def _initialize_token(self):
-        # 토큰을 생성합니다.
-        await self._create_token() if self.token is None else await self._read_token() # 토큰을 불러옵니다.
-    
     async def _text_length(self, text):
         return True if len(text) > 500 else False
-    
-    # 매개변수로 받은 텍스트를 맞춤법 검사를 진행합니다.
-    async def spell_check(self, text, async_delay):
-        # 리스트나 튜플을 texts 변수에 할당, 단일 텍스트를 리스트로 변환
-        texts = text if isinstance(text, (list, tuple)) else [text]
-        
+
+    async def _check_texts(self, texts):
         for txt in texts:
             if await self._text_length(txt):
                 print(f"텍스트가 500자가 넘습니다. ({len(txt):,.0f})")
-                return None
-        
+                return False
+        return True
+                
+    # 매개변수로 받은 텍스트를 맞춤법 검사를 진행합니다.
+    async def spell_check(self, text, async_delay):
+        # 필요한 리스트 초기화
         spell_checked_data = []
         passed_time_data = []
+        
+        # 리스트나 튜플을 texts 변수에 할당, 단일 텍스트를 리스트로 변환
+        texts = text if isinstance(text, (list, tuple)) else [text]
+        
+        if not await self._check_texts(texts):
+            return None
         
         for txt in texts:
             start_time = time.time()
@@ -125,20 +131,43 @@ class AsyncSpellChecker:
             *[self._parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_checked_data, texts, passed_time_data)]
         )
         
+        
+        if len(parse_results) == 1:
+            return parse_results[0]
+        
         return parse_results  # 결과 반환
-    
+
+    async def _spell_check_output_mode(self, obj, output_mode):
+        if obj is None:
+            print("오류: obj가 None입니다.")
+            return None  # obj가 None인 경우 처리
+
+        # 기본 출력 모드
+        output = obj.only_checked() if hasattr(obj, 'only_checked') else None
+
+        if output_mode == 1:
+            return obj  # output_mode가 1일 경우 spell을 사용
+
+        elif output_mode == 2 and hasattr(obj, 'as_dict'):
+            return obj.as_dict()  # output_mode가 2일 경우 as_dict() 호출
+
+        return output
+        
     async def spell_check_output(self, data, output_mode=1):
-        for spell in data:
-            # 기본 출력 모드
-            output = spell.only_checked()
-
-            if output_mode == 1:
-                output = spell  # output_mode가 1일 경우 spell을 사용
-            elif output_mode == 2 and hasattr(spell, 'as_dict'):
-                output = spell.as_dict()  # output_mode가 2일 경우 as_dict() 호출
-
-            print(output)  # 최종 출력
-                
+        if isinstance(data, dict):
+            for value in data:
+                if value is not None:
+                    if isinstance(value, (list, tuple)):
+                        for spell in value:
+                            output = await self._spell_check_output_mode(spell, output_mode)
+                            print(output)  # 각 스펠 체크 결과 출력
+                    else:
+                        print("데이터가 반복 가능한 타입이 아닙니다.")
+                else:
+                    print("데이터가 없음.")
+        else:
+            output = await self._spell_check_output_mode(data, output_mode)
+            print(output)  # 단일 데이터의 스펠 체크 결과 출력
         
 
     async def _parse(self, data, text, passed_time):
@@ -216,60 +245,3 @@ class AsyncSpellChecker:
     # 세션 종료.
     async def close(self):
         await self.session.close()
-            
-
-
-async def main1():
-    SpellChecker = AsyncSpellChecker()
-    tasks = [
-        SpellChecker.spell_check(
-            text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
-            async_delay=2
-        ),
-        
-        SpellChecker.spell_check(
-            text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
-            async_delay=2
-        )
-    ]
-
-    # 비동기 작업을 병렬로 실행하고 완료된 순서대로 결과를 처리
-    for completed in asyncio.as_completed(tasks):
-        result = await completed
-        if result is not None:
-            await SpellChecker.spell_check_output(result)
-
-    # 세션 종료
-    await SpellChecker.close()
-
-
-async def main2():
-    SpellChecker = AsyncSpellChecker()
-    
-    word1 = await SpellChecker.spell_check(
-            text=["안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다." *50, "안녕"],
-            async_delay=2
-    )
-
-    word2 = await SpellChecker.spell_check(
-            text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
-            async_delay=2
-    )
-
-    word3 = await SpellChecker.spell_check(
-            text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
-            async_delay=2
-    )
-    
-    for word in [word1, word2, word3]:
-        if word is not None:
-            await SpellChecker.spell_check_output(word)
-
-    # 세션 종료
-    await SpellChecker.close()
-
-# 비동기 이벤트 루프 실행
-if __name__ == '__main__':
-    # asyncio.run(main())
-    asyncio.run(main2())
-    
