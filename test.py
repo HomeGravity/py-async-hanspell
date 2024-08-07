@@ -10,7 +10,7 @@ async def main1():
         ),
         
         SpellChecker.spell_check(
-            text="안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다.", 
+            text="안녕 하세요. 저는 한국인 임니다. 이문잔은 한굴로 작성됬습니다.", 
             async_delay=2
         )
     ]
@@ -39,5 +39,5 @@ async def main2():
 
 # 비동기 이벤트 루프 실행
 if __name__ == '__main__':
-    # asyncio.run(main())
-    asyncio.run(main2())
+    asyncio.run(main1())
+    # asyncio.run(main2())

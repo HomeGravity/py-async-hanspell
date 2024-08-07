@@ -11,19 +11,12 @@ from . import __version__
 from .headers import *
 from .check_result import CheckResult
 from .checked import Checked
+from .check_python_version import check_python_version
 
 # 토큰 요청을 줄이기 위해 캐시로 저장합니다.
 cache = TTLCache(maxsize=10, ttl=3600)
 
-class PythonVersionError(Exception):
-    pass
-
-def check_python_version():
-    import sys
-    if sys.version_info < (3, 10):
-        raise PythonVersionError("파이썬 버전 3.10 이상이 필요합니다.")
-
-def remove_tags_and_contents(text):
+def remove_tag(text):
     # 정규 표현식: '<...>'와 그 안의 내용을 모두 삭제합니다.
     return re.sub(r'<[^>]*>', '', text, count=1)
 
@@ -222,7 +215,7 @@ class AsyncSpellChecker:
         
         # 결과를 원하는 형식으로 변환
         for word, check_result in zip(words, check_results):
-            result['words'][remove_tags_and_contents(word)] = check_result
+            result['words'][remove_tag(word)] = check_result
 
         return Checked(**result)
 
