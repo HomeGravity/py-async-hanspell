@@ -147,21 +147,21 @@ class AsyncSpellChecker:
         return output
         
     async def spell_check_output(self, data, output_mode=1):
-        if isinstance(data, dict):
-            for value in data:
-                if value is not None:
+        if value is not None:
+            # 딕셔너리 타입만 허용.
+            if isinstance(data, dict):
+                for value in data:
                     if isinstance(value, (list, tuple)):
                         for spell in value:
                             output = await self._spell_check_output_mode(spell, output_mode)
                             print(output)  # 각 스펠 체크 결과 출력
                     else:
                         print("데이터가 반복 가능한 타입이 아닙니다.")
-                else:
-                    print("데이터가 없음.")
+            else:
+                output = await self._spell_check_output_mode(data, output_mode)
+                print(output)  # 단일 데이터의 스펠 체크 결과 출력
         else:
-            output = await self._spell_check_output_mode(data, output_mode)
-            print(output)  # 단일 데이터의 스펠 체크 결과 출력
-        
+            print("데이터가 없음.")
 
     async def _parse(self, data, text, passed_time):
         html = data['message']['result']['html']
