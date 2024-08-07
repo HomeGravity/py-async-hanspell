@@ -87,7 +87,6 @@ class AsyncSpellChecker:
         # 맞춤법 검사기에 텍스트 교정 요청을 보냅니다.
         async with self.session.get(self.spell_checker_url, headers=self.spell_checker_requests_headers, params=spell_checker_payload) as response:
             response.raise_for_status()  # 상태 코드가 200이 아닐 경우 예외 발생
-            
             return await response.json()
 
     async def _text_length(self, text):
@@ -117,51 +116,21 @@ class AsyncSpellChecker:
             await self.initialize_token()  # 반복할때마다 토큰을 재초기화 (한번 초기화하면 캐시에 저장된게 불러와짐.)
             spell_checked_data.append(await self._get_response(txt))  # 응답 가져와서 저장
             passed_time_data.append(time.time() - start_time)
-            await asyncio.sleep(async_delay)  # 대기
+            
+            # 1 보다 높으면.
+            if len(texts) > 1:
+                await asyncio.sleep(async_delay)  # 대기
+
 
         # 비동기적으로 각 텍스트에 대해 파싱 수행
         parse_results = await asyncio.gather(
             *[self._parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_checked_data, texts, passed_time_data)]
         )
         
-        
         if len(parse_results) == 1:
             return parse_results[0]
         
         return parse_results  # 결과 반환
-
-    async def _spell_check_output_mode(self, obj, output_mode):
-        if obj is None:
-            print("오류: obj가 None입니다.")
-            return None  # obj가 None인 경우 처리
-
-        # 기본 출력 모드
-        output = obj.only_checked() if hasattr(obj, 'only_checked') else None
-
-        if output_mode == 1:
-            return obj  # output_mode가 1일 경우 spell을 사용
-
-        elif output_mode == 2 and hasattr(obj, 'as_dict'):
-            return obj.as_dict()  # output_mode가 2일 경우 as_dict() 호출
-
-        return output
-        
-    async def spell_check_output(self, data, output_mode=1):
-        if value is not None:
-            # 딕셔너리 타입만 허용.
-            if isinstance(data, dict):
-                for value in data:
-                    if isinstance(value, (list, tuple)):
-                        for spell in value:
-                            output = await self._spell_check_output_mode(spell, output_mode)
-                            print(output)  # 각 스펠 체크 결과 출력
-                    else:
-                        print("데이터가 반복 가능한 타입이 아닙니다.")
-            else:
-                output = await self._spell_check_output_mode(data, output_mode)
-                print(output)  # 단일 데이터의 스펠 체크 결과 출력
-        else:
-            print("데이터가 없음.")
 
     async def _parse(self, data, text, passed_time):
         html = data['message']['result']['html']
