@@ -104,7 +104,6 @@ class AsyncSpellChecker:
     async def spell_check(self, text, async_delay):
         # 리스트나 튜플을 texts 변수에 할당, 단일 텍스트를 리스트로 변환
         texts = text if isinstance(text, (list, tuple)) else [text]
-        await self._initialize_token()  # 토큰 초기화
         
         for txt in texts:
             if await self._text_length(txt):
@@ -116,7 +115,7 @@ class AsyncSpellChecker:
         
         for txt in texts:
             start_time = time.time()
-            await self._initialize_token()  # 각 텍스트에 대해 토큰 초기화
+            await self._initialize_token()  # 반복할때마다 토큰을 재초기화 (한번 초기화하면 캐시에 저장된게 불러와짐.)
             spell_checked_data.append(await self._get_response(txt))  # 응답 가져와서 저장
             passed_time_data.append(time.time() - start_time)
             await asyncio.sleep(async_delay)  # 대기
