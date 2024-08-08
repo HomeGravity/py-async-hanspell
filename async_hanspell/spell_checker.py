@@ -63,10 +63,10 @@ class AsyncSpellChecker:
             token_text = await response.text()
             
             # 토큰 업데이트
-            return await self._token_update(token_text)
+            return self._token_update(token_text)
     
     # 받은 토큰 텍스트를 Parse (구문 분석) 합니다.
-    async def _token_update(self, token):
+    def _token_update(self, token):
             match = re.search('passportKey=([a-zA-Z0-9]+)', token)
             if match is not None:
                 # parse.unquote는 URL 디코딩 함수입니다.
@@ -89,28 +89,12 @@ class AsyncSpellChecker:
             response.raise_for_status()  # 상태 코드가 200이 아닐 경우 예외 발생
             return await response.json()
 
-    async def async_insert_spell_checked_errors(self, spell_check_results, parse_results):
+    def insert_spell_checked_errors(self, spell_check_results, parse_results):
         for k, v in spell_check_results["spell_checked_error"].items():
-            await asyncio.sleep(0)  # 비동기 대기 (실제 비동기 작업으로 대체 가능)
             parse_results.insert(k, v)
         return parse_results
 
-    async def process_results(self, updated_results):
-        """
-        이 함수는 업데이트된 결과를 처리합니다.
-        
-        - 만약 결과가 하나뿐이라면 그 결과를 직접 반환합니다.
-        - 여러 개의 결과가 있을 경우, 리스트 형태로 반환합니다.
-
-        Args:
-            updated_results (list): 업데이트된 결과 리스트.
-
-        Returns:
-            단일 결과 또는 결과 리스트.
-        """
-        # 비동기 작업이 필요할 경우 여기에 추가
-        await asyncio.sleep(0)  # 예시로 비동기 대기 (실제 비동기 작업으로 대체 가능)
-
+    def process_results(self, updated_results):
         # 업데이트된 결과의 길이에 따라 반환 방식 결정
         if len(updated_results) == 1:
             return updated_results[0]  # 단일 결과 반환
@@ -153,10 +137,10 @@ class AsyncSpellChecker:
             *[self._parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
         )
         
-        # 글자수가 500 글자가 넘어간거는 오류로 처리하고 비동기적으로 삽입
-        updated_results = await self.async_insert_spell_checked_errors(spell_check_results, parsed_results)
+        # 글자수가 500 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
+        updated_results = self.insert_spell_checked_errors(spell_check_results, parsed_results)
 
-        return await self.process_results(updated_results)
+        return self.process_results(updated_results)
 
 
     async def _parse(self, data, text, passed_time):
@@ -217,6 +201,8 @@ class AsyncSpellChecker:
 
     async def _check_word(self, word):
         # 각 단어의 상태를 비동기적으로 체크합니다.
+        await asyncio.sleep(0)  # 비동기 대기
+        
         if word.startswith('<red>'):
             return CheckResult.WRONG_SPELLING
         
