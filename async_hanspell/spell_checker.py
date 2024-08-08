@@ -132,10 +132,9 @@ class AsyncSpellChecker:
                 await asyncio.sleep(async_delay)  # 대기
 
 
-        # 비동기적으로 각 텍스트에 대해 파싱 수행
-        parsed_results = await asyncio.gather(
-            *[self._parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
-        )
+        # 동기적으로 각 텍스트에 대해 파싱 수행
+        parsed_results = [self._parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
+        
         
         # 글자수가 500 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
         updated_results = self.insert_spell_checked_errors(spell_check_results, parsed_results)
@@ -143,7 +142,7 @@ class AsyncSpellChecker:
         return self.process_results(updated_results)
 
 
-    async def _parse(self, data, text, passed_time):
+    def _parse(self, data, text, passed_time):
         html = data['message']['result']['html']
         result = {
             'result': True,
@@ -156,7 +155,7 @@ class AsyncSpellChecker:
         
         words = []
         self._extract_words(words, html)
-        return await self._check_words(result, words)  # 비동기 체크 호출
+        return self._check_words(result, words)  # 비동기 체크 호출
     
     def _remove_tags(self, text):
         text = '<content>{}</content>'.format(text).replace('<br>','')
@@ -187,11 +186,9 @@ class AsyncSpellChecker:
                 .replace('<em class=\'blue_text\'>', '<blue>') \
                 .replace('</em>', '<end>')
                 
-    async def _check_words(self, result, words):
-        # 비동기적으로 각 단어를 체크합니다.
-        check_results = await asyncio.gather(
-            *[self._check_word(word) for word in words]
-        )
+    def _check_words(self, result, words):
+        # 동기적으로 각 단어를 체크합니다.
+        check_results = [self._check_word(word) for word in words]
         
         # 결과를 원하는 형식으로 변환
         for word, check_result in zip(words, check_results):
@@ -199,9 +196,8 @@ class AsyncSpellChecker:
 
         return Checked(**result)
 
-    async def _check_word(self, word):
-        # 각 단어의 상태를 비동기적으로 체크합니다.
-        await asyncio.sleep(0)  # 비동기 대기
+    def _check_word(self, word):
+        # 각 단어의 상태를 체크합니다.
         
         if word.startswith('<red>'):
             return CheckResult.WRONG_SPELLING

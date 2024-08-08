@@ -13,7 +13,17 @@ async def main1():
         ),
         
         SpellChecker.spell_check(
-            text=["안녕 하세요. 저는 한국인 임니다. 이문잔은 한굴로 작성됬습니다."], 
+            text=["안녕 하세요. 저는 한국인 임니다. 이문잔은 한굴로 작성됬습니다."]*5, 
+            async_delay=2
+        ),
+        
+        SpellChecker.spell_check(
+            text=["안녕 하세요. 저는 한국인 임니다. 이문잔은 한굴로 작성됬습니다."]*5, 
+            async_delay=2
+        ),
+        
+        SpellChecker.spell_check(
+            text=["안녕 하세요. 저는 한국인 임니다. 이문잔은 한굴로 작성됬습니다."]*5, 
             async_delay=2
         )
     ]
