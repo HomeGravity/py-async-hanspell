@@ -1,6 +1,12 @@
 from async_hanspell.spell_checker import *
 import asyncio
 
+
+# 비동기 출력
+async def async_print(*args):
+    print(*args)
+
+
 async def main1():
     SpellChecker = AsyncSpellChecker()
     await SpellChecker.initialize_token()
@@ -17,35 +23,42 @@ async def main1():
         )
     ]
 
+    start_time = time.time()
     # 비동기 작업을 병렬로 실행하고 완료된 순서대로 결과를 처리
     for completed in asyncio.as_completed(tasks):
         result = await completed
-        print(result)
+        await async_print(result)
+    await async_print(f"\n\n소요 시간: {time.time() - start_time:.4f}초")
 
     # 세션 종료
     await SpellChecker.close()
-
 
 async def main2():
     SpellChecker = AsyncSpellChecker()
     await SpellChecker.initialize_token() # 토큰 초기화 메소드 입니다. 반드시 호출해야합니다.
     
-    # word1 = await SpellChecker.spell_check(
-    #         text=["안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다."],
-    #         async_delay=0
-    # )
-    
-    # print(word1)
-    
-    word2 = await SpellChecker.spell_check(
-            text=["태스트 문장입니다"*10, "테스트입니다"*10, "안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다."*10],
+    word1 = await SpellChecker.spell_check(
+            text= ["이것은 비동기 마춤범 검사기 테스트 문장 임니다."],
             async_delay=0
     )
     
-    print(word2)
+    # for word in word1:
+    await async_print(word1)
+    
+    # start_time = time.time()
+    # for txt in ["이것은 비동기 마춤범 검사기 테스트 문장 임니다.", "안녕 하세요. 저는 한국인 입니다. 이문장은 한글로 작성됬습니다"]:
+    #     word2 = await SpellChecker.spell_check(
+    #             text=txt,
+    #             async_delay=0
+    #     )
+        
+    #     await async_print(word2)
+    # await async_print(f"\n\n소요 시간: {time.time() - start_time:.4f}초")
     
     # 세션 종료
     await SpellChecker.close()
+
+
 
 # 비동기 이벤트 루프 실행
 if __name__ == '__main__':
