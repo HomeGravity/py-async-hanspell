@@ -89,12 +89,12 @@ class AsyncSpellChecker:
             response.raise_for_status()  # 상태 코드가 200이 아닐 경우 예외 발생
             return await response.json()
 
-    def insert_spell_checked_errors(self, spell_check_results, parse_results):
+    def _insert_spell_checked_errors(self, spell_check_results, parse_results):
         for k, v in spell_check_results["spell_checked_error"].items():
             parse_results.insert(k, v)
         return parse_results
 
-    def process_results(self, updated_results):
+    def _process_results(self, updated_results):
         # 업데이트된 결과의 길이에 따라 반환 방식 결정
         if len(updated_results) == 1:
             return updated_results[0]  # 단일 결과 반환
@@ -137,9 +137,9 @@ class AsyncSpellChecker:
         
         
         # 글자수가 500 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
-        updated_results = self.insert_spell_checked_errors(spell_check_results, parsed_results)
+        updated_results = self._insert_spell_checked_errors(spell_check_results, parsed_results)
 
-        return self.process_results(updated_results)
+        return self._process_results(updated_results)
 
 
     def _parse(self, data, text, passed_time):
