@@ -19,7 +19,7 @@ spell_checker_requests_headers = {
 
 # 요청 페이로드를 작성합니다.
 spell_checker_payload = {
-    "passportKey": None,
-    "q": None,
+    "passportKey": "",
+    "q": "",
     "color_blindness": 0
 }

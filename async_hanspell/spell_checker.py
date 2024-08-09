@@ -22,7 +22,7 @@ class AsyncSpellChecker:
         self.spell_checker_requests_headers = spell_checker_requests_headers
         
         # 토큰 초기화
-        self.token = None
+        self.token = ""
         
         # 세션 생성
         self.session = aiohttp.ClientSession()
@@ -65,6 +65,10 @@ class AsyncSpellChecker:
             response.raise_for_status()  # 상태 코드가 200이 아닐 경우 예외 발생
             return await response.json() # json 타입으로 리턴
 
+    # 맞춤법 검사 요청시 문제가 생긴 경우 (ex. "error":"유효한 키가 아닙니다."} 리턴 등) 토큰을 재초기화해서 문제 해결을 시도함.
+    async def _check_spelling_request(self, text):
+        result = await self._get_response(text)
+        return await self._get_response(text) if "error" in result["message"] and await self.initialize_token() is None else result
     
     # 매개변수로 받은 텍스트를 맞춤법 검사를 진행합니다.
     async def spell_check(self, text, async_delay, is_output=False):
@@ -84,7 +88,7 @@ class AsyncSpellChecker:
         for idx, txt in enumerate(texts):
             if len(txt) < 500: # 네이버 맞춤법 검사기 최대로 지원하는 글자수.
                 start_time = time.time()
-                spell_check_results["spell_checked"].append(await self._get_response(txt))  # 응답 가져와서 저장
+                spell_check_results["spell_checked"].append(await self._check_spelling_request(txt))  # 응답 가져와서 저장
                 spell_check_results["passed_time"].append(time.time() - start_time)
                 spell_check_results["original_text"].append(txt)
                 # 텍스트 검사 개수가 1개 보다 많으면 대기.

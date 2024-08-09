@@ -42,7 +42,7 @@ class SpellParser:
         
         words = []
         self._extract_words(words, html)
-        return self._check_words(result, words)  # 비동기 체크 호출
+        return self._check_words(result, words)  # 동기적 체크 호출
         
     def _remove_tags(self, text):
         wrapped_text = f'<content>{text}</content>'

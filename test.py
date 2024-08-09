@@ -1,17 +1,10 @@
 from async_hanspell.spell_checker import *
 import asyncio
-
-
-async def main1():
-    SpellChecker = AsyncSpellChecker()
-    await SpellChecker.initialize_token()
-    
-import asyncio
 import time
 
 async def main1():
     SpellChecker = AsyncSpellChecker()
-    await SpellChecker.initialize_token()
+    # await SpellChecker.initialize_token()
     
     tasks = [
         SpellChecker.spell_check(
