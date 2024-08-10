@@ -81,7 +81,7 @@ class AsyncSpellChecker:
             "spell_checked": [],
             "passed_time": [],
             "original_text": [],
-            "spell_checked_error": {} # 텍스트 길이가 500자가 넘어간 경우 처리
+            "spell_checked_error": {} # 텍스트 길이가 300자가 넘어간 경우 처리
         }
 
         
@@ -90,7 +90,7 @@ class AsyncSpellChecker:
         texts_len = len(texts)
         
         for idx, txt in enumerate(texts):
-            if len(txt) < 500: # 네이버 맞춤법 검사기 최대로 지원하는 글자수.
+            if len(txt) <= 300: # 네이버 맞춤법 검사기 최대로 지원하는 글자수.
                 start_time = time.time()
                 spell_check_results["spell_checked"].append(await self._check_spelling_request(txt))  # 응답 가져와서 저장
                 spell_check_results["passed_time"].append(time.time() - start_time)
@@ -105,7 +105,7 @@ class AsyncSpellChecker:
         # 동기적으로 각 텍스트에 대해 파싱 수행
         parsed_results = [self.spell_parser.parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
         
-        # 글자수가 500 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
+        # 글자수가 300 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
         updated_results = self._insert_spell_checked_errors(spell_check_results, parsed_results)
         self._results_output(updated_results, is_output)
         return self._process_results(updated_results)
