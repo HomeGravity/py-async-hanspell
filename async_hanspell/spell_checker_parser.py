@@ -68,7 +68,6 @@ class SpellParser:
             words.append(word)
 
     def _replace_tags(self, html):
-        
         # 정규 표현식을 사용하여 태그를 대체
         pattern = re.compile('|'.join(self.tag_mapping.keys()))
         return pattern.sub(lambda match : self.tag_mapping[match.group(0)], html)

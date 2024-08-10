@@ -4,7 +4,7 @@ import time
 
 async def main1():
     SpellChecker = AsyncSpellChecker()
-    # await SpellChecker.initialize_token()
+    await SpellChecker.initialize_token() # 토큰 초기화 메소드 입니다. 반드시 호출해야합니다.
     
     tasks = [
         SpellChecker.spell_check(

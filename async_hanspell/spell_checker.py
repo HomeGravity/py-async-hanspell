@@ -28,7 +28,7 @@ class AsyncSpellChecker:
         self.session = aiohttp.ClientSession()
         
         # Parse 생성
-        self.speel_parser = SpellParser()
+        self.spell_parser = SpellParser()
         
     
     # 토큰 초기화
@@ -68,7 +68,11 @@ class AsyncSpellChecker:
     # 맞춤법 검사 요청시 문제가 생긴 경우 (ex. "error":"유효한 키가 아닙니다."} 리턴 등) 토큰을 재초기화해서 문제 해결을 시도함.
     async def _check_spelling_request(self, text):
         result = await self._get_response(text)
-        return await self._get_response(text) if "error" in result["message"] and await self.initialize_token() is None else result
+        if "error" in result["message"]:
+            await self.initialize_token()
+            return await self._get_response(text)
+        
+        return result    
     
     # 매개변수로 받은 텍스트를 맞춤법 검사를 진행합니다.
     async def spell_check(self, text, async_delay, is_output=False):
@@ -99,7 +103,7 @@ class AsyncSpellChecker:
                 
 
         # 동기적으로 각 텍스트에 대해 파싱 수행
-        parsed_results = [self.speel_parser.parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
+        parsed_results = [self.spell_parser.parse(spell_text, original_text, passed_time) for (spell_text, original_text, passed_time) in zip(spell_check_results["spell_checked"], spell_check_results["original_text"], spell_check_results["passed_time"])]
         
         # 글자수가 500 글자가 넘어간거는 오류로 처리하고 동기적으로 삽입
         updated_results = self._insert_spell_checked_errors(spell_check_results, parsed_results)
